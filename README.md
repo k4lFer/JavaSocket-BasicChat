@@ -41,13 +41,13 @@ javac src/main/java/com/mycompany/jpsocket/client/JFClient.java
 ### 2. Ejecutar el servidor
 Se ejecutara de forma local en el puerto 9999
 ```bash
-java -cp src/main/java/com.mycompany.jpsocket.JPSocket
+java -cp src/main/java com.mycompany.jpsocket.JPSocket
 ```
 
 ### 3. Ejecutar el cliente
 Puedes abrir varias instancias del cliente si quieres probar múltiples conexiones.
 ```bash
-java -cp src/main/java/com.mycompany.jpsocket.client.JFClient
+java -cp src/main/java com.mycompany.jpsocket.client.JFClient
 ```
 
 ### 4. Enviar mensajes
