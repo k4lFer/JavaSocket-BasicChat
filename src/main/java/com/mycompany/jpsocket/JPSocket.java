@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany.jpsocket;
 
 import java.io.IOException;
@@ -21,7 +17,7 @@ public class JPSocket {
             System.out.println("Servidor iniciado en el puerto 9999...");
             while (true) { // Bucle infinito para aceptar conexiones de clientes
                 Socket clientSocket = serverSocket.accept(); // Acepta una conexión de cliente
-                System.out.println("Nuevo cliente conectado"); // Imprime un mensaje
+                System.out.println("Nuevo cliente conectado" + clientSocket); // Imprime un mensaje
                 new Thread(new ClientHandler(clientSocket)).start(); // Crea un nuevo hilo para manejar al cliente conectado
             }
         } catch (IOException e) {
