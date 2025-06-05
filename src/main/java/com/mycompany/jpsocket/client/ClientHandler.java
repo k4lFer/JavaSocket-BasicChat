@@ -9,13 +9,16 @@ import java.net.Socket;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
 
-    private static final List<ClientHandler> clients = new ArrayList<>(); // Lista de clientes conectados
+    //private static final List<ClientHandler> clients = new ArrayList<>(); // Lista de clientes conectados
+    private static final List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
+    private String currentReceiver = null;
 
     private final Socket socket; // Socket del cliente
     private String clientName; // Nombre del cliente, puede ser utilizado para personalizar mensajes
@@ -59,10 +62,35 @@ public class ClientHandler implements Runnable {
                     receiveFile();
                     //sendFile(fileName); // Envía el archivo al cliente
                 }
-                System.out.println("Mensaje enviado de: " + socket.getRemoteSocketAddress() + " a " + socket.getLocalSocketAddress() +" Hora :" + formatter.format(LocalTime.now())); // Imprime el mensaje recibido junto con las direcciones del socket remoto y local
-                broadcast(message); // Envía el mensaje a todos los clientes conectados
-                
-            }
+
+                if (message.startsWith("RECEIVER:")) {
+                    currentReceiver = message.substring(9).trim(); // Guarda el receptor temporalmente
+                    continue;
+                }
+                if (message.startsWith("HISTORY_REQUEST:")) {
+                    String[] users = message.substring(16).split("\\|");
+                    if (users.length == 2) {
+                        String senderUser = users[0];
+                        String receiverUser = users[1];
+                        List<String> history = getHistory(senderUser, receiverUser);
+
+                        for (String histMsg : history) {
+                            output.writeUTF("HISTORY_MSG:" + histMsg);
+                        }
+                        // Indicar fin de historial
+                        //output.writeUTF("HISTORY_END");
+                    }
+                }
+
+
+                if (currentReceiver != null) {
+                    // Enviar mensaje privado
+                    broadcastOnebyOne(message, clientName, currentReceiver);
+                    currentReceiver = null; // Limpiar receptor después de enviar
+                }
+                    System.out.println("Mensaje enviado de: " + socket.getRemoteSocketAddress() + " a " + socket.getLocalSocketAddress() +" Hora :" + formatter.format(LocalTime.now())); // Imprime el mensaje recibido junto con las direcciones del socket remoto y local
+                    //broadcast(message); // Envía el mensaje a todos los clientes conectados   
+                }
         } catch (IOException e) { // Maneja excepciones al leer mensajes
             System.out.println("Cliente desconectado.");
         } finally { // Bloque finally para cerrar recursos
@@ -100,12 +128,14 @@ public class ClientHandler implements Runnable {
             : receiver + "|" + sender;
 
         // Busca el historial en todos los clientes conectados
-        for (ClientHandler client : clients) {
+       /* for (ClientHandler client : clients) {
             if (client.data.containsKey(key)) {
                 return client.data.get(key);
             }
         }
         return null;
+        */
+        return data.getOrDefault(key, new ArrayList<>());
     }
     
 
@@ -113,7 +143,7 @@ public class ClientHandler implements Runnable {
     private void broadcastOnebyOne(String message, String sender, String receiver) {
         synchronized (clients) { // Bloque sincronizado para evitar problemas de concurrencia
             for (ClientHandler client : clients) { // Itera sobre la lista de clientes conectados
-                if (client.clientName.equals(receiver)) { // Si el cliente es el destinatario del mensaje
+                if (client.clientName.equals(receiver) || client.clientName.equals(sender)) { // Si el cliente es el destinatario del mensaje
                     try {
                         // Crear una clave única para el par de usuarios (ordenada alfabéticamente)
                         String key = sender.compareTo(receiver) < 0
@@ -123,13 +153,24 @@ public class ClientHandler implements Runnable {
                         // Guardar el mensaje en el historial
                         data.putIfAbsent(key, new ArrayList<>());
                         List<String> messages = data.get(key);
-                        messages.add("[" + formatter.format(java.time.LocalTime.now()) + "] " + sender + ": " + message);
+                        //messages.add("[" + formatter.format(java.time.LocalTime.now()) + "] " + sender + ": " + message);
 
-                        client.output.writeUTF("[" + formatter.format(java.time.LocalTime.now()) + "] " + sender + ": " + message); // Envia el mensaje al cliente
+                        String time = formatter.format(java.time.LocalTime.now());
+                        String formattedMessage = "[" + time + "] ";
+
+                        //client.output.writeUTF("[" + formatter.format(java.time.LocalTime.now()) + "] " + sender + ": " + message); // Envia el mensaje al cliente
+                                            // Enviar mensaje con etiqueta [Yo] si es al emisor, o con el nombre del sender si es al receptor
+                        if (client.clientName.equals(sender)) {
+                            formattedMessage += "[Yo] " + message;
+                        } else {
+                            formattedMessage += "[" + sender + "] " + message;
+                        }
+                        messages.add(formattedMessage); // Agrega el mensaje al historial
+                        client.output.writeUTF(formattedMessage); // Envia el mensaje al cliente
+
                     } catch (IOException e) {
                         System.out.println("Error al enviar mensaje a " + receiver + ": " + e.getMessage()); // Imprime el mensaje de error
                     }
-                    break; // Sale del bucle una vez que se ha enviado el mensaje al destinatario
                 }
             }
         }
@@ -189,12 +230,9 @@ public class ClientHandler implements Runnable {
             // Envía una confirmación al cliente
             String content = new String(java.nio.file.Files.readAllBytes(outFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
             System.out.println("contenido: " + content);
-            String escapedContent = content
-                                    .replace("&", "&amp;")
-                                    .replace("<", "&lt;")
-                                    .replace(">", "&gt;")
-                                    .replace("\n", "<br/>");
-             broadcast("<b>Contenido del archivo \"" + fileName + "\":</b><br/>" + escapedContent);
+
+            //broadcast("<b>Contenido del archivo \"" + fileName + "\":</b><br/>" + escapedContent);
+            broadcastOnebyOne(content, clientName, currentReceiver);
         }
     }
 

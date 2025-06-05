@@ -12,6 +12,7 @@ import java.net.Socket;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -20,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class JFClient extends javax.swing.JFrame implements Runnable{
     private String name;
+    private String receiver;
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
@@ -32,8 +34,7 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
         initComponents();
         jTFInputMessage.setEditable(false);
         jBttnSend.setEnabled(false);
-        jTxtPMessageArea.setEditable(false);
-        jTxtPMessageArea.setContentType("text/html");
+        jTxtMessageArea.setEditable(false);
     }
 
 
@@ -56,15 +57,16 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
     // Enviar mensaje al servidor
     private void enviarMensaje() {
         try {
+            if (receiver == null || receiver.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please select a user to send the message.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            output.writeUTF("RECEIVER:" + receiver + "\n"); // Envía el receptor al servidor
             output.writeUTF(jTFInputMessage.getText() + "\n"); // Envía el mensaje al servidor con el nombre del usuario
             jTFInputMessage.setText(""); // Limpia el campo de entrada de mensaje
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Error al enviar mensaje: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private void addBubble(String message) {
-
     }
 
     private void updateUserTable(String listData) {
@@ -99,10 +101,11 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
         jTFName = new javax.swing.JTextField();
         jBttnRegister = new javax.swing.JButton();
         jBttnLoadFile = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTxtPMessageArea = new javax.swing.JTextPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTxtMessageArea = new javax.swing.JTextArea();
+        jPViewImg = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,14 +132,8 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
             }
         });
 
-        jScrollPane2.setViewportView(jTxtPMessageArea);
-
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"Al", "online"},
-                {"fer", "online"},
-                {null, null},
-                {null, null},
                 {null, null},
                 {null, null}
             },
@@ -151,32 +148,44 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
         });
         jScrollPane1.setViewportView(jTable1);
 
+        jTxtMessageArea.setColumns(20);
+        jTxtMessageArea.setRows(5);
+        jScrollPane3.setViewportView(jTxtMessageArea);
+
+        javax.swing.GroupLayout jPViewImgLayout = new javax.swing.GroupLayout(jPViewImg);
+        jPViewImg.setLayout(jPViewImgLayout);
+        jPViewImgLayout.setHorizontalGroup(
+            jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 173, Short.MAX_VALUE)
+        );
+        jPViewImgLayout.setVerticalGroup(
+            jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(32, 32, 32)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(34, 34, 34)
                         .addComponent(jBttnRegister))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jBttnSend))
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(81, 81, 81)
-                        .addComponent(jBttnLoadFile)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(40, 40, 40))))
+                        .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jBttnSend)))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jBttnLoadFile)
+                    .addComponent(jPViewImg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -187,15 +196,18 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jBttnRegister))
-                        .addGap(15, 15, 15)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jBttnSend)
-                    .addComponent(jBttnLoadFile))
-                .addContainerGap(24, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPViewImg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jBttnSend)
+                                .addComponent(jBttnLoadFile))))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         pack();
@@ -226,6 +238,7 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
         // TODO add your handling code here:
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(this);
+        
 
         if (result == JFileChooser.APPROVE_OPTION) {
             java.io.File selectedFile = fileChooser.getSelectedFile();
@@ -254,14 +267,19 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         // TODO add your handling code here:
-        // Obtener el usuario seleccionado
-        if (jTable1.getSelectedRow() == -1) {
-            return; // No hay fila seleccionada
-        }
-        var selectRow = jTable1.getSelectedRow();// Obtiene la fila seleccionada 
-        String selectedUser = (String) jTable1.getValueAt(selectRow, 0); // Obtiene el nombre del usuario seleccionado
-             
-        System.out.println("Position: "+jTable1.getValueAt(selectRow, 0));
+        int selectedRow = jTable1.getSelectedRow();  
+        if (selectedRow != -1) {
+            receiver = (String) jTable1.getValueAt(selectedRow, 0);
+
+            jTxtMessageArea.setText("");
+
+           /* try {
+                output.writeUTF("HISTORY_REQUEST:" + name + "|" + receiver); // name = usuario actual
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error al pedir historial: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }*/
+        }    
+
     }//GEN-LAST:event_jTable1MouseClicked
 
 
@@ -305,12 +323,13 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
     private javax.swing.JButton jBttnLoadFile;
     private javax.swing.JButton jBttnRegister;
     private javax.swing.JButton jBttnSend;
+    private javax.swing.JPanel jPViewImg;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextField jTFInputMessage;
     private javax.swing.JTextField jTFName;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextPane jTxtPMessageArea;
+    private javax.swing.JTextArea jTxtMessageArea;
     // End of variables declaration//GEN-END:variables
     
     @Override
@@ -322,9 +341,28 @@ public class JFClient extends javax.swing.JFrame implements Runnable{
                 if (msg.startsWith("USERLIST:")) {
                     updateUserTable(msg.substring(9));
                 }
+                else if (msg.startsWith("HISTORY_MSG:")) {
+                    String histMsg = msg.substring(12);
+                    jTxtMessageArea.append(histMsg + "\n");
+                }
+                else if (msg.startsWith("[FILE]")) {
+                    // Manejar archivo recibido
+                    // Extrae nombre y contenido si vienen en formato: [FILE][hora] sender: filename\ncontenido...
+                    int splitIndex = msg.indexOf("\n");
+                    if (splitIndex != -1) {
+                        String header = msg.substring(0, splitIndex); // [FILE][hora] sender: filename
+                        String content = msg.substring(splitIndex + 1); // contenido
+                        jTxtMessageArea.append(header + "\n");
+                        jTxtMessageArea.append("Contenido del archivo:\n" + content + "\n\n");
+                    } else {
+                        jTxtMessageArea.append(msg + "\n"); // fallback
+                    }
+                }
+ 
                 else{
-                    jTxtPMessageArea.setText(msg);
-                    jTxtPMessageArea.setCaretPosition(jTxtPMessageArea.getDocument().getLength());
+                    //jTxtPMessageArea.setText(msg);
+                    //jTxtPMessageArea.setCaretPosition(jTxtPMessageArea.getDocument().getLength());
+                    jTxtMessageArea.append(msg + "\n"); // Agrega el mensaje al área de texto
                 }
                 
                 //String currentText = jTxtPMessageArea.getText();
