@@ -1,385 +1,420 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package com.mycompany.jpsocket.client;
+    /*
+    * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+    * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+    */
+    package com.mycompany.jpsocket.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.Socket;
+import java.awt.Color;
+import java.awt.Image;
+    import java.awt.image.BufferedImage;
+    import java.io.ByteArrayInputStream;
+    import java.io.ByteArrayOutputStream;
+    import java.io.DataInputStream;
+    import java.io.DataOutputStream;
+    import java.io.File;
+    import java.io.FileInputStream;
+    import java.io.FileOutputStream;
+    import java.io.IOException;
+    import java.net.Socket;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
-import javax.swing.table.DefaultTableModel;
+    import javax.imageio.ImageIO;
+    import javax.swing.ImageIcon;
 
-/**
- *
- * @author k4lfer
- */
-public class JFClient extends javax.swing.JFrame implements Runnable{
-    private String name;
-    private String receiver;
-    private Socket socket;
-    private DataInputStream input;
-    private DataOutputStream output;
-
+    import javax.swing.JFileChooser;
+    import javax.swing.JLabel;
+    import javax.swing.JOptionPane;
+    import javax.swing.table.DefaultTableModel;
 
     /**
-     * Creates new form JFClient
+     *
+     * @author k4lfer
      */
-    public JFClient() {
-        initComponents();
-        jTFInputMessage.setEditable(false);
-        jBttnSend.setEnabled(false);
-        jTxtMessageArea.setEditable(false);
-    }
+    public class JFClient extends javax.swing.JFrame implements Runnable{
+        private String name;
+        private String receiver;
+        private Socket socket;
+        private DataInputStream input;
+        private DataOutputStream output;
 
 
-    // Conectar al servidor
-    private void connect() {
-        try {
-            socket = new Socket("0.0.0.0", 9999); // Conectar al servidor en localhost y puerto 9999
-            input = new DataInputStream(socket.getInputStream()); // Stream de entrada
-            output = new DataOutputStream(socket.getOutputStream()); // Stream de salida
-            output.writeUTF(name); // Enviar el nombre del usuario
-
-            Thread thread = new Thread(this); // Crea un nuevo hilo
-            thread.start(); // Hilo que escucha mensajes del servidor
-
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "No se pudo conectar al servidor: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // Enviar mensaje al servidor
-    private void enviarMensaje() {
-        try {
-            if (receiver == null || receiver.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please select a user to send the message.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            output.writeUTF("RECEIVER:" + receiver + "\n"); // Envía el receptor al servidor
-            output.writeUTF(jTFInputMessage.getText() + "\n"); // Envía el mensaje al servidor con el nombre del usuario
-            jTFInputMessage.setText(""); // Limpia el campo de entrada de mensaje
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error al enviar mensaje: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void updateUserTable(String listData) {
-        String[] rows = listData.split(",");
-        String[][] data = new String[rows.length][2];
-
-        for (int i = 0; i < rows.length; i++) {
-            if(!rows[i].isEmpty()) {
-                data[i][0] = rows[i];
-                data[i][1] = "Online";
-            }
+        /**
+         * Creates new form JFClient
+         */
+        public JFClient() {
+            initComponents();
+            
+            jTFInputMessage.setEditable(false);
+            jBttnSend.setEnabled(false);
+            jTxtMessageArea.setEditable(false);
         }
 
-        jTable1.setModel(new DefaultTableModel(
-            data,
-            new String[]{"Users", "Status"}
-        ));
-    }
 
+        // Conectar al servidor
+        private void connect() {
+            try {
+                socket = new Socket("0.0.0.0", 9999); // Conectar al servidor en localhost y puerto 9999
+                input = new DataInputStream(socket.getInputStream()); // Stream de entrada
+                output = new DataOutputStream(socket.getOutputStream()); // Stream de salida
+                output.writeUTF(name); // Enviar el nombre del usuario
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jBttnSend = new javax.swing.JButton();
-        jTFInputMessage = new javax.swing.JTextField();
-        jTFName = new javax.swing.JTextField();
-        jBttnRegister = new javax.swing.JButton();
-        jBttnLoadFile = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTxtMessageArea = new javax.swing.JTextArea();
-        jPViewImg = new javax.swing.JPanel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jBttnSend.setText("Send");
-        jBttnSend.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBttnSendActionPerformed(evt);
-            }
-        });
-
-        jTFName.setToolTipText("");
-
-        jBttnRegister.setText("Register");
-        jBttnRegister.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBttnRegisterActionPerformed(evt);
-            }
-        });
-
-        jBttnLoadFile.setText("Load File");
-        jBttnLoadFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBttnLoadFileActionPerformed(evt);
-            }
-        });
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Users", "Status"
-            }
-        ));
-        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTable1MouseClicked(evt);
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
-
-        jTxtMessageArea.setColumns(20);
-        jTxtMessageArea.setRows(5);
-        jScrollPane3.setViewportView(jTxtMessageArea);
-
-        javax.swing.GroupLayout jPViewImgLayout = new javax.swing.GroupLayout(jPViewImg);
-        jPViewImg.setLayout(jPViewImgLayout);
-        jPViewImgLayout.setHorizontalGroup(
-            jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 173, Short.MAX_VALUE)
-        );
-        jPViewImgLayout.setVerticalGroup(
-            jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(32, 32, 32)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(jBttnRegister))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jBttnSend)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jBttnLoadFile)
-                    .addComponent(jPViewImg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jBttnRegister))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jPViewImg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jBttnSend)
-                                .addComponent(jBttnLoadFile))))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void jBttnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnSendActionPerformed
-        enviarMensaje();
-    }//GEN-LAST:event_jBttnSendActionPerformed
-
-    private void jBttnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnRegisterActionPerformed
-        // TODO add your handling code here:
-        name = jTFName.getText().trim();
-        if(name.isEmpty())
-        {
-            JOptionPane.showMessageDialog(this, "Please enter your name", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        else
-        {
-            jTFName.setEditable(false);
-            jBttnRegister.setEnabled(false);
-            jTFInputMessage.setEditable(true);
-            jBttnSend.setEnabled(true);
-            connect(); // Llama al método para conectar al servidor
-        }
-    }//GEN-LAST:event_jBttnRegisterActionPerformed
-
-    private void jBttnLoadFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnLoadFileActionPerformed
-        // TODO add your handling code here:
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(this);
-        
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            java.io.File selectedFile = fileChooser.getSelectedFile();
-
-            try (FileInputStream fileInput = new FileInputStream(selectedFile)) {
-                // Enviar nombre y tamaño primero
-                output.writeUTF("FILE"); // comando para indicar que se enviará un archivo
-                output.writeUTF(selectedFile.getName()); // Nombre del archivo
-                output.writeLong(selectedFile.length()); // Tamaño del archivo
-
-                // Enviar contenido en fragmentos
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = fileInput.read(buffer)) != -1) {
-                    output.write(buffer, 0, bytesRead);
-                }
-                output.flush(); // Asegura que todos los datos se envíen
-
-                JOptionPane.showMessageDialog(this, "Archivo enviado exitosamente.");
+                Thread thread = new Thread(this); // Crea un nuevo hilo
+                thread.start(); // Hilo que escucha mensajes del servidor
 
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error al enviar el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se pudo conectar al servidor: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-    }//GEN-LAST:event_jBttnLoadFileActionPerformed
 
-    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        // TODO add your handling code here:
-        int selectedRow = jTable1.getSelectedRow();  
-        if (selectedRow != -1) {
-            receiver = (String) jTable1.getValueAt(selectedRow, 0);
+        // Enviar mensaje al servidor
+        private void enviarMensaje() {
+            try {
+                if (receiver == null || receiver.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please select a user to send the message.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                output.writeUTF("RECEIVER:" + receiver + "\n"); // Envía el receptor al servidor
+                output.writeUTF(jTFInputMessage.getText() + "\n"); // Envía el mensaje al servidor con el nombre del usuario
+                jTFInputMessage.setText(""); // Limpia el campo de entrada de mensaje
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al enviar mensaje: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
 
-            jTxtMessageArea.setText("");
+        private void updateUserTable(String listData) {
+            String[] rows = listData.split(",");
+            String[][] data = new String[rows.length][2];
 
-           /* try {
-                output.writeUTF("HISTORY_REQUEST:" + name + "|" + receiver); // name = usuario actual
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Error al pedir historial: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }*/
-        }    
+            for (int i = 0; i < rows.length; i++) {
+                if(!rows[i].isEmpty()) {
+                    data[i][0] = rows[i];
+                    data[i][1] = "Online";
+                }
+            }
 
-    }//GEN-LAST:event_jTable1MouseClicked
+            jTable1.setModel(new DefaultTableModel(
+                data,
+                new String[]{"Users", "Status"}
+            ));
+        }
 
 
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+        /**
+         * This method is called from within the constructor to initialize the form.
+         * WARNING: Do NOT modify this code. The content of this method is always
+         * regenerated by the Form Editor.
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+        @SuppressWarnings("unchecked")
+        // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+        private void initComponents() {
+
+            jBttnSend = new javax.swing.JButton();
+            jTFInputMessage = new javax.swing.JTextField();
+            jTFName = new javax.swing.JTextField();
+            jBttnRegister = new javax.swing.JButton();
+            jBttnLoadFile = new javax.swing.JButton();
+            jScrollPane1 = new javax.swing.JScrollPane();
+            jTable1 = new javax.swing.JTable();
+            jScrollPane3 = new javax.swing.JScrollPane();
+            jTxtMessageArea = new javax.swing.JTextArea();
+            jPViewImg = new javax.swing.JPanel();
+
+            setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+            jBttnSend.setText("Send");
+            jBttnSend.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    jBttnSendActionPerformed(evt);
+                }
+            });
+
+            jTFName.setToolTipText("");
+
+            jBttnRegister.setText("Register");
+            jBttnRegister.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    jBttnRegisterActionPerformed(evt);
+                }
+            });
+
+            jBttnLoadFile.setText("Load File");
+            jBttnLoadFile.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    jBttnLoadFileActionPerformed(evt);
+                }
+            });
+
+            jTable1.setModel(new javax.swing.table.DefaultTableModel(
+                new Object [][] {
+                    {null, null},
+                    {null, null}
+                },
+                new String [] {
+                    "Users", "Status"
+                }
+            ));
+            jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                    jTable1MouseClicked(evt);
+                }
+            });
+            jScrollPane1.setViewportView(jTable1);
+
+            jTxtMessageArea.setColumns(20);
+            jTxtMessageArea.setRows(5);
+            jScrollPane3.setViewportView(jTxtMessageArea);
+
+            jPViewImg.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+            javax.swing.GroupLayout jPViewImgLayout = new javax.swing.GroupLayout(jPViewImg);
+            jPViewImg.setLayout(jPViewImgLayout);
+            jPViewImgLayout.setHorizontalGroup(
+                jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(0, 173, Short.MAX_VALUE)
+            );
+            jPViewImgLayout.setVerticalGroup(
+                jPViewImgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(0, 0, Short.MAX_VALUE)
+            );
+
+            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+            getContentPane().setLayout(layout);
+            layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(32, 32, 32)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(34, 34, 34)
+                            .addComponent(jBttnRegister))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jBttnSend)))
+                    .addGap(18, 18, 18)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jBttnLoadFile)
+                        .addComponent(jPViewImg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(26, 26, 26))
+            );
+            layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(22, 22, 22)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jTFName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jBttnRegister))
+                            .addGap(18, 18, 18)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPViewImg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
+                            .addGap(18, 18, 18)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jTFInputMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jBttnSend)
+                                    .addComponent(jBttnLoadFile)))))
+                    .addContainerGap(49, Short.MAX_VALUE))
+            );
+
+            pack();
+        }// </editor-fold>//GEN-END:initComponents
+
+        private void jBttnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnSendActionPerformed
+            enviarMensaje();
+        }//GEN-LAST:event_jBttnSendActionPerformed
+
+        private void jBttnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnRegisterActionPerformed
+            // TODO add your handling code here:
+            name = jTFName.getText().trim();
+            if(name.isEmpty())
+            {
+                JOptionPane.showMessageDialog(this, "Please enter your name", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            else
+            {
+                jTFName.setEditable(false);
+                jBttnRegister.setEnabled(false);
+                jTFInputMessage.setEditable(true);
+                jBttnSend.setEnabled(true);
+                connect(); // Llama al método para conectar al servidor
+            }
+        }//GEN-LAST:event_jBttnRegisterActionPerformed
+
+        private void jBttnLoadFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBttnLoadFileActionPerformed
+            // TODO add your handling code here:
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+
+                try (FileInputStream fileInput = new FileInputStream(selectedFile)) {
+                    if (receiver == null || receiver.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Por favor selecciona un receptor antes de enviar el archivo.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    output.writeUTF("RECEIVER:" + receiver); 
+                    // Enviar nombre y tamaño primero
+                    output.writeUTF("FILE"); // comando para indicar que se enviará un archivo
+                    output.writeUTF(selectedFile.getName()); // Nombre del archivo
+                    output.writeLong(selectedFile.length()); // Tamaño del archivo
+
+                    // Enviar contenido en fragmentos
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = fileInput.read(buffer)) != -1) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                    output.flush(); // Asegura que todos los datos se envíen
+
+                    JOptionPane.showMessageDialog(this, "Archivo enviado exitosamente.");
+
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Error al enviar el archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        }//GEN-LAST:event_jBttnLoadFileActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new JFClient().setVisible(true);
-            }
-        });
-    }
+        private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+            // TODO add your handling code here:
+            int selectedRow = jTable1.getSelectedRow();  
+            if (selectedRow != -1) {
+                receiver = (String) jTable1.getValueAt(selectedRow, 0);
+                jTxtMessageArea.setText("");
+            }    
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jBttnLoadFile;
-    private javax.swing.JButton jBttnRegister;
-    private javax.swing.JButton jBttnSend;
-    private javax.swing.JPanel jPViewImg;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextField jTFInputMessage;
-    private javax.swing.JTextField jTFName;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextArea jTxtMessageArea;
-    // End of variables declaration//GEN-END:variables
-    
-    @Override
-    public void run() {
-        try {
-            while (!socket.isClosed()) { // Mientras el socket no esté cerrado
-                // Lee el mensaje enviado por el servidor
-                String msg = input.readUTF();
-                if (msg.startsWith("USERLIST:")) {
-                    updateUserTable(msg.substring(9));
-                }
-                else if (msg.startsWith("HISTORY_MSG:")) {
-                    String histMsg = msg.substring(12);
-                    jTxtMessageArea.append(histMsg + "\n");
-                }
-                else if (msg.startsWith("[FILE]")) {
-                    // Manejar archivo recibido
-                    // Extrae nombre y contenido si vienen en formato: [FILE][hora] sender: filename\ncontenido...
-                    int splitIndex = msg.indexOf("\n");
-                    if (splitIndex != -1) {
-                        String header = msg.substring(0, splitIndex); // [FILE][hora] sender: filename
-                        String content = msg.substring(splitIndex + 1); // contenido
-                        jTxtMessageArea.append(header + "\n");
-                        jTxtMessageArea.append("Contenido del archivo:\n" + content + "\n\n");
-                    } else {
-                        jTxtMessageArea.append(msg + "\n"); // fallback
+        }//GEN-LAST:event_jTable1MouseClicked
+
+
+
+        /**
+         * @param args the command line arguments
+         */
+        public static void main(String args[]) {
+            /* Set the Nimbus look and feel */
+            //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+            /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+            * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+            */
+            try {
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
                     }
                 }
- 
-                else{
-                    //jTxtPMessageArea.setText(msg);
-                    //jTxtPMessageArea.setCaretPosition(jTxtPMessageArea.getDocument().getLength());
-                    jTxtMessageArea.append(msg + "\n"); // Agrega el mensaje al área de texto
-                }
-                
-                //String currentText = jTxtPMessageArea.getText();
-                //String newText = currentText + "<br>" + msg;
-                
-                //addBubble(msg);
-        
+            } catch (ClassNotFoundException ex) {
+                java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            } catch (InstantiationException ex) {
+                java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+                java.util.logging.Logger.getLogger(JFClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Conexión perdida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        } finally { // Bloque finally para cerrar recursos
-            // Cierra los streams de entrada y salida
+            //</editor-fold>
+
+            /* Create and display the form */
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    new JFClient().setVisible(true);
+                }
+            });
+        }
+
+        // Variables declaration - do not modify//GEN-BEGIN:variables
+        private javax.swing.JButton jBttnLoadFile;
+        private javax.swing.JButton jBttnRegister;
+        private javax.swing.JButton jBttnSend;
+        private javax.swing.JPanel jPViewImg;
+        private javax.swing.JScrollPane jScrollPane1;
+        private javax.swing.JScrollPane jScrollPane3;
+        private javax.swing.JTextField jTFInputMessage;
+        private javax.swing.JTextField jTFName;
+        private javax.swing.JTable jTable1;
+        private javax.swing.JTextArea jTxtMessageArea;
+        // End of variables declaration//GEN-END:variables
+        
+        @Override
+        public void run() {
             try {
-                if (socket != null) socket.close(); // Cierra el socket
-            } catch (IOException ignored) {
-                JOptionPane.showMessageDialog(this, "Error al cerrar la conexión: " + ignored.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            } 
+                while (!socket.isClosed()) { // Mientras el socket no esté cerrado
+                    // Lee el mensaje enviado por el servidor
+                    String msg = input.readUTF();
+                    if (msg.startsWith("USERLIST:")) {
+                        updateUserTable(msg.substring(9));
+                    }
+                    else if (msg.startsWith("FILE")) {
+                        try {
+                            String fileName = input.readUTF();
+                            String senderName = input.readUTF();
+                            long fileSize = input.readLong();
+
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            byte[] buffer = new byte[4096];
+                            long totalRead = 0;
+                            int read;
+
+                            while (totalRead < fileSize &&
+                                (read = input.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
+                                baos.write(buffer, 0, read);
+                                totalRead += read;
+                            }
+
+                            System.out.println("Tamaño total leído: " + totalRead + " bytes");
+
+                            //jTxtMessageArea.append("[Archivo recibido: " + fileName + "]\n");
+                            System.out.println("Archivo recibido: " + fileName + " (" + totalRead + " bytes)");
+
+                            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
+                                ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+                                BufferedImage img = ImageIO.read(bais);
+
+                                if (img != null) {
+                                    jPViewImg.setLayout(new java.awt.BorderLayout());
+
+                                    Image scaledImage = img.getScaledInstance(jPViewImg.getWidth(), jPViewImg.getHeight(), Image.SCALE_SMOOTH);
+                                    ImageIcon icon = new ImageIcon(scaledImage);
+                                    JLabel imageLabel = new JLabel(icon);
+
+                                    jPViewImg.removeAll(); // Limpiar contenido anterior
+                                    jPViewImg.add(imageLabel);
+                                    jPViewImg.revalidate();
+                                    jPViewImg.repaint();
+                                    jPViewImg.setVisible(true);
+                                    System.out.println("Imagen cargada correctamente");
+                                } else {
+                                    jTxtMessageArea.append("No se pudo mostrar la imagen.\n");
+                                }
+                            }
+
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(this, "Error al recibir archivo: " + ex.getMessage());
+                        }
+                    }
+                    else{
+                        jTxtMessageArea.append(msg + "\n"); 
+                    }
+                            
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Conexión perdida: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally { // Bloque finally para cerrar recursos
+                // Cierra los streams de entrada y salida
+                try {
+                    if (socket != null) socket.close(); 
+                } catch (IOException ignored) {
+                    JOptionPane.showMessageDialog(this, "Error al cerrar la conexión: " + ignored.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                } 
+            }
         }
     }
-}
